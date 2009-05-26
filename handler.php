@@ -61,7 +61,6 @@ switch ($_POST['func']) {
 
    default:
       echo '<pre>';
-      $pm->categories();
-      var_dump($pm->a);
+      $pm->navigation();
       break;
 }

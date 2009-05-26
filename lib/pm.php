@@ -119,148 +119,80 @@ class PageManagement
       
       return true;
    }
-   
-   public function createMenu()
-   {
-      $query = "SELECT `id`, `order`, `parent` " .
-               "FROM `pm` " .
-               "ORDER BY `parent` ASC, `order` ASC";
-
-      $rows = $this->db->get_results($query);
-
-      echo '<pre>';
-      print_r($this->menuLoop($rows));
-   }
-   
-   private function menuLoop($data)
-   {
-      $menu = array();
-      print_r($data);
-      for ($i=0; $i < count($data); $i++) { 
-         $value = $data[$i];
-         // var_dump($value);
-         // var_dump($value->parent);
-         
-         // Not the first in level or in root level
-         if ($value->order != 0 || $value->parent == 0) {
-            array_push($menu, array(
-               'id'     => $value->id,
-               'order'  => $value->order,
-               'parent' => $value->parent
-            ));
-            unset($data[$i]);
-            $i--;
-         } 
-         
-         // Not in the root level
-         else {
-            $temp = array(
-               'id'     => $value->id,
-               'order'  => $value->order,
-               'parent' => $value->parent
-            );
-            array_push($menu[$i-1], $temp);
-            // unset($data[$i]);
-            // $this->menuLoop($data);
-            
-            // array_push($menu[$i - 1], $temp);
-            // print_r($temp);
-            // print_r($menu[$i - 1]);
-            // echo $i;
-         }
-      }
-      return $menu;
-      
-      // print_r($menu);
-   }
-   
-   
-   
-   
-   
-   
-   // private $fetched_tree = array();
-   //   
-   //   public function tree_fetch($parent = 0)
-   //   {
-   //      $query = "SELECT `id`, `order`, `parent`, `title`" .
-   //               "FROM `pm` " .
-   //               "ORDER BY `parent` ASC, `order` ASC";
-   // 
-   //      $rows = $this->db->get_results($query);
-   //      
-   //      $tree = array();
-   // 
-   //      foreach ($rows as $row) {
-   //         $tree[$row->parent][$row->id] = array('title' => $row->title, 'id' => $row->id);
-   //      }
-   // 
-   //      echo '<pre>';
-   // 
-   //      $this->tree_print($tree, $parent);
-   //      
-   // 
-   //      // print_r($tree);
-   //      var_dump($this->fetched_tree);
-   //      
-   //   }
-   //   
-   //   public function tree_print($tree, $parent)
-   //   {
-   //      // print_r($tree[$parent]);
-   //      
-   //      foreach($tree[$parent] as $id => $value) {
-   //      // for ($i=1; $i <= count($tree[$parent]); $i++) { 
-   //      //    $value = $tree[$parent][$i];
-   //      //    $id = $item['id'];
-   //         // var_dump($id);
-   //         // var_dump($value['title']);
-   // 
-   //         $this->fetched_tree[] = array('id' => $id, 'title' => $value['title']);
-   //         // var_dump($this->fetched_tree);
-   //         
-   //         // var_dump($value['title']);
-   //         // var_dump(isset($tree[$id]));
-   //         // var_dump($id);
-   //         // var_dump(is_array($tree[$id]));
-   //         // var_dump($tree[$id]);
-   //         // echo "\n--\n";
-   //         
-   //         if(isset($tree[$id]) && is_array($tree[$id])) {
-   //            $this->tree_print($tree, $id);
-   //         }
-   //      }
-   //   }
-   
-   public $a = array();
-   
+    //   
+    // public function createMenu()
+    // {
+    //    $query = "SELECT `id`, `order`, `parent` " .
+    //             "FROM `pm` " .
+    //             "ORDER BY `parent` ASC, `order` ASC";
+    // 
+    //    $rows = $this->db->get_results($query);
+    // 
+    //    echo '<pre>';
+    //    print_r($this->menuLoop($rows));
+    // }
+    // 
+    // private function menuLoop($data)
+    // {
+    //    $menu = array();
+    //    print_r($data);
+    //    for ($i=0; $i < count($data); $i++) { 
+    //       $value = $data[$i];
+    //       // var_dump($value);
+    //       // var_dump($value->parent);
+    //       
+    //       // Not the first in level or in root level
+    //       if ($value->order != 0 || $value->parent == 0) {
+    //          array_push($menu, array(
+    //             'id'     => $value->id,
+    //             'order'  => $value->order,
+    //             'parent' => $value->parent
+    //          ));
+    //          unset($data[$i]);
+    //          $i--;
+    //       } 
+    //       
+    //       // Not in the root level
+    //       else {
+    //          $temp = array(
+    //             'id'     => $value->id,
+    //             'order'  => $value->order,
+    //             'parent' => $value->parent
+    //          );
+    //          array_push($menu[$i-1], $temp);
+    //          // unset($data[$i]);
+    //          // $this->menuLoop($data);
+    //          
+    //          // array_push($menu[$i - 1], $temp);
+    //          // print_r($temp);
+    //          // print_r($menu[$i - 1]);
+    //          // echo $i;
+    //       }
+    //    }
+    //    return $menu;
+    //    
+    //    // print_r($menu);
+    // }
+ 
    // Builds category list 
-   public function categories($category=0, $level=0) { 
+   public function navigation($parent=0, $level=0) { 
       $query = "SELECT `ID`, `parent`, `title` " .
                "FROM `pm` " .
-               "WHERE parent = '" . $category . "'"; 
+               "WHERE parent = '" . $parent . "'"; 
 
       $rows = $this->db->get_results($query);
 
       if (count($rows) > 0) {
          $level++; 
          foreach ($rows as $row) {
-            // $this->a[$row->ID] = array($row->ID, $row->title);
-            // array_push($this->a, array($row->ID, $row->title));
             for ($i=0; $i < $level; $i++) { 
                echo '-';
             }
             echo ' i: ', $row->ID, ' t: ', $row->title, "\n"; 
-            $this->categories($row->ID, $level);
+            $this->navigation($row->ID, $level);
          }
       }
    }
-   
-   
-   
-   
-   
-   
    
    
    

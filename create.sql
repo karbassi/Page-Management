@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS `pm` (
   `title` text NOT NULL,
   `status` enum('draft','private','public') NOT NULL default 'draft',
   `parent` bigint(20) unsigned NOT NULL default '0',
-  `menu_order` int(11) NOT NULL default '0',
+  `order` int(11) NOT NULL default '0',
+  `hidden` tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (`ID`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;

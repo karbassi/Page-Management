@@ -17,7 +17,7 @@
          form{border: 1px solid #F00;}*/
 
          /*Production*/
-         body{}
+/*         body{font:italic 18px "Warnock Pro","Goudy Old Style","Palatino","Book Antiqua",Georgia,serif;letter-spacing:1px;word-spacing:2px;line-height:10px;}*/
          .clear{clear: both;}
          #navigation, #main {float:left;margin:1em 0.5em;padding:0.5em;}
          #navigation{width:250px;min-width: 250px;max-width:250px;}
@@ -38,10 +38,10 @@
          .checkbox label{width:10px;clear:none;margin: 0;padding: 0;}
 
          /*Sorting List*/
-         .sort-handle { cursor:move; }
+/*         .sort-handle { cursor:move; }
          .helper{border:2px dashed #777;}
          .current-nesting{background-color:yellow;}
-         
+*/
          /* Notification */
          #notification {
             cursor: pointer;
@@ -56,110 +56,79 @@
             top: 0;
             text-align: center;
          }
-  
+
 
       </style>
 
 
-      
+
       <!--  jQuery -->
       <script type="text/javascript" src="lib/jquery/jquery.pack.js"></script>
-      <!-- // <script type="text/javascript" src="lib/jquery/jquery-1.3.2.js"></script> -->
-      <!-- // <script type="text/javascript" src="lib/jquery/jquery-1.1.4.js"></script> -->
 
       <!-- iNestedSortable -->
-      <!-- // <script type="text/javascript" src="lib/jquery/interface-1.2.js"></script> -->
-      <!-- // <script type="text/javascript" src="lib/jquery/inestedsortable.pack.js"></script> -->
+      <!-- <script type="text/javascript" src="lib/jquery/interface-1.2.js"></script>
+      <script type="text/javascript" src="lib/jquery/inestedsortable.js"></script> -->
+      
       <script type="text/javascript" src="lib/jquery/interface-1.2.js"></script>
       <script type="text/javascript" src="lib/jquery/inestedsortable.js"></script>
-      
-      <!-- jGrowl -->
-      <!-- <script type="text/javascript" src="lib/jquery/jquery.ui.all.js"></script>
-      <script type="text/javascript" src="lib/jquery/jquery.jgrowl.pack.js"></script> -->
-      
+      <script type="text/javascript" src="lib/jquery/jquery.nestedsortablewidget.js"></script>
+
       <!-- Notification -->
-      <!-- // <script type="text/javascript" src="lib/jquery/jquery.notice.js"></script> -->
       <script type="text/javascript" src="lib/jquery/jquery.notification.js"></script>
-      
+
       <script type="text/javascript">
          // Stuff to do as soon as the DOM is ready. Use $() w/o colliding with other libs;
          (function($){
             jQuery(document).ready(function($) {
-            
+
+
+               $('#navigation').NestedSortableWidget({
+                  name: "nav",
+                  loadUrl: "handler.php?menu",
+                  handle: true,
+                  nestedSortCfg: {
+                     accept: 'item',
+                     opacity: 0.6,
+                     fx: 400,
+                     revert: true,
+                     helperclass: 'helper',
+                     autoScroll: true,
+                     handle: '.sort-handle',
+                     onChange: function(serialized) {
+                        $.post("handler.php",
+                           {
+                              func:    'menu',
+                              data:    serialized[0].hash
+                           },
+                           function(data){
+                              $.addNotification({text: data.message});
+                           },
+                           "json"
+                        );
+                     }
+                  }
+               });
+               
                var formChanged = false;
 
-               
-               
-               // Build navigation
-               // var test = 'nav[0][id]=2&nav[1][id]=12&nav[2][id]=3&nav[3][id]=4&nav[3][children][0][id]=5&nav[3][children][0][children][0][id]=6';
-               // var fields = test.split("&");
-               // var o = new Object();
-               // $(fields).each(function(index) {
-               //    var key_value = fields[index].split('=');
-               //    var key = decodeURIComponent(key_value[0]);
-               //    var value = decodeURIComponent(key_value[1]);
-               //    
-               //    console.debug(key);
-               //    console.debug(value);
-               //    
-               //    var t = key.split('[');
-               //    $(t).each(function(x) {
-               //       var k = t[1]
-               //       console.debug('-' + t[a]);
-               //    });
-               // });
-            
+
                $('#title, #content, #status, #type, #hidden').change(function(){
                   formChanged = true;
-               });
-            
-               // Sorting List
-               $('#nav').NestedSortable({
-                  accept: 'page-item1',
-                  noNestingClass: "no-nesting",
-                  opacity: 0.8,
-                  helperclass: 'helper',
-                  onChange: function(serialized) {
-                     console.debug(serialized[0]);
-                     // console.debug(serialized[0].hash);
-                     // console.debug(serialized[0].o.nav);
-                     // console.debug(serialized[0].o.nav);
-                     // var x = serialized[0].o.nav;
-                     // 
-                     // $(x).each(function(i){
-                     //    console.debug(x.i);
-                     // });
-                  
-                     $.post("handler.php",
-                        {
-                           func:    'menu',
-                           data:    serialized[0].hash
-                        },
-                        function(data){
-                           console.debug(data);
-                           $.addNotification({text: data.message});
-                        },
-                        "json"
-                     );
-                  
-                  },
-                  autoScroll: true,
-                  handle: '.sort-handle'
                });
 
                // Handle submit
                $('#postButton').click(function() {
-               
+
                   // Stop if there hasn't been any changes.
                   if (!formChanged)
                   {
                      $.addNotification({text: "Nothing was changed."});
                      return;
                   };
-                  
+
                   // Disable button to stop multiple submits simultaneously.
                   $('#postButton').val("Submitting...").attr("disabled","disabled");
-               
+
                   $.post("handler.php",
                      {
                         func:    "post",
@@ -171,20 +140,17 @@
                         hidden:  $('#hidden').is(':checked'),
                      },
                      function(data){
-                     
+
                         // Only set value if there ID doesn't exist.
                         if (!$.trim($('#post_id').val())) {
                            $('#post_id').val(data.id);
                         };
-                     
+
                         formChanged = false;
-                     
+
                         // Re-enable the button.
                         $('#postButton').val("Post").removeAttr("disabled");
 
-                        console.debug(data.id);
-                        console.debug(data.message);
-                        
                         // Notify
                         $.addNotification({text: data.message});
                      },
@@ -197,24 +163,25 @@
       </script>
    </head>
    <body>
-      <div id="navigation">
+      <div id="navigation"></div>
+      <!-- <div id="navigation">
          <ul id="nav" class="page-list">
-            <li id="ele-1" class="clear-element page-item1 left sort-handle">
+            <li id="ele-1" class="clear-element item">
                <div class='sort-handle'>File 1</div>
             </li>
-            <li id="ele-2" class="clear-element page-item1 left">
+            <li id="ele-2" class="clear-element item">
                <div class='sort-handle'>File 2</div>
             </li>
-            <li id="ele-3" class="clear-element page-item1 left">
+            <li id="ele-3" class="clear-element item">
                <div class='sort-handle'>Folder 1</div>
             </li>
-            <li id="ele-4" class="clear-element page-item1 left">
+            <li id="ele-4" class="clear-element item">
                <div class='sort-handle'>Folder 2</div>
                <ul class="page-list">
-                  <li id="ele-5" class="clear-element page-item1 left">
+                  <li id="ele-5" class="clear-element item">
                      <div class='sort-handle'>Folder 3</div>
                      <ul class="page-list" >
-                        <li id="ele-6" class="clear-element page-item1 left">
+                        <li id="ele-6" class="clear-element item">
                            <div class='sort-handle'>File 3</div>
                         </li>
                      </ul>
@@ -222,7 +189,7 @@
                </ul>
             </li>
          </ul>
-      </div>
+      </div> -->
       <!-- #navigation -->
 
       <div id="main">

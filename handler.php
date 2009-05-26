@@ -12,6 +12,15 @@ require_once 'lib/pm.php';
 // Create a new PageManagement instance.
 $pm = new PageManagement();
 
+// Retrieve menu
+if (isset($_GET['menu'])) {
+   echo $pm->buildMenu();
+   if ($_POST) {
+      echo $_POST;
+   }
+   exit;
+}
+
 // Make sure you're not trying to create when you want to update.
 if (!empty($_POST['id'])) {
    $_POST['func'] = 'update';
@@ -60,7 +69,6 @@ switch ($_POST['func']) {
       break;
 
    default:
-      echo '<pre>';
-      $pm->navigation();
+
       break;
 }

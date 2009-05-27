@@ -23,6 +23,3 @@ fieldset #formElement{margin-left:2em;}
 #navigation>div,#main>div{padding:3em 2em;}
 .nsw-item-row div{cursor:pointer;}
 /*#dragHelper{border:2px dashed #777777;}*/
-
-/* Notification */
-#notification{cursor:pointer;font-weight:bold;font:30px Helvetica,sans-serif;line-height:2em;color:#FFF;background-color:#AEAEAE;position:absolute;z-index:9999;opacity:0.80;top:0;text-align:center;}

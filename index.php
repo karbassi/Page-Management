@@ -1,7 +1,7 @@
 <?php 
 session_start();
 if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
-   header("Location: signin.php");
+   header("Location: login.php");
 }
 
 ?>
@@ -16,8 +16,9 @@ if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
       <link rel="icon" href="data:image/png,%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%10%00%00%00%10%08%02%00%00%00%90%91h6%00%00%00%19IDAT(%91c%0C%DD%10%C5%40%0A%60%22I%F5%A8%86Q%0DCJ%03%00dy%01%7F%0C%9F0%7D%00%00%00%00IEND%AEB%60%82" type="image/png">
 
       <!-- Let's work from scratch, shall we? -->
-      <link href="css/reset.css" rel="stylesheet" type="text/css" media="all">
-      <link href="css/style.css" rel="stylesheet" type="text/css" media="all">
+      <link rel="stylesheet" type="text/css" media="all" href="css/reset.css">
+      <link rel="stylesheet" type="text/css" media="all" href="css/style.css">
+      <link rel="stylesheet" type="text/css" media="all" href="css/notification.css">
 
       <!--  jQuery -->
       <script type="text/javascript" src="lib/jquery/jquery.pack.js"></script>

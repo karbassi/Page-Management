@@ -1,11 +1,5 @@
 <?php
 
-// Stop any calls not from the main page.
-// if (!$_POST || !$_REQUEST) {
-//    header("Location: ./");
-//    exit;
-// }
-
 // Load PageManagement Class.
 require_once 'lib/pm.php';
 
@@ -15,11 +9,16 @@ $pm = new PageManagement();
 // Retrieve menu
 if (isset($_GET['menu'])) {
    echo $pm->buildMenu();
-   if ($_POST) {
-      echo $_POST;
-   }
    exit;
 }
+
+// Stop any calls not from the main page.
+if (!$_POST || !$_REQUEST) {
+   header("Location: ./");
+   exit;
+}
+
+
 
 // Make sure you're not trying to create when you want to update.
 if (!empty($_POST['id'])) {
@@ -30,7 +29,7 @@ if (!empty($_POST['id'])) {
 switch ($_POST['func']) {
    case 'post':
       unset($_POST['func']);
-      $id = $pm->post($_POST);
+      $id = $pm->postNewContent($_POST);
 
       if ($id) {
          $message = "Content create.";
@@ -44,7 +43,7 @@ switch ($_POST['func']) {
 
    case 'update':
       unset($_POST['func']);
-      $id = $pm->update($_POST);
+      $id = $pm->updateContent($_POST);
 
       if ($id) {
          $message = "Content updated.";

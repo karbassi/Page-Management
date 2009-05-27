@@ -30,7 +30,7 @@ class PageManagement
    }
 
 
-   public function post($data)
+   public function postNewContent($data)
    {
       // Clean the data.
       $data = $this->clean($data);
@@ -40,6 +40,9 @@ class PageManagement
          return $this->update($data);
       }
 
+      // Setting this to an extreme so new content is listed last.
+      $data['order'] = (int)$this->db->get_var("SELECT MAX(`order`) FROM `pm`") + 1;
+      
       // Start the query string parts.
       $query = 'INSERT INTO pm (';
       $part2 = 'VALUES (';
@@ -58,13 +61,16 @@ class PageManagement
 
       // Run the query and return the auto generated id.
       if ($this->db->query($query)) {
-         return $this->db->insert_id;
+         $id = $this->db->insert_id;
+         // $order = (int)$this->db->get_var("SELECT `order` FROM `pm` WHERE `id` = '" . $id . "'");
+         // return array($id, $order);
+         return $id;
       }
 
       return false;
    }
 
-   public function update($data)
+   public function updateContent($data)
    {
       // Clean up the data.
       $data = $this->clean($data);
@@ -131,7 +137,7 @@ class PageManagement
       $query = "SELECT `ID`, `parent`, `title` " .
                "FROM `pm` " .
                "WHERE parent = '" . $parent . "' " .
-               "ORDER BY `parent` ASC ";
+               "ORDER BY `order` ASC, `parent` ASC ";
 
       $rows = $this->db->get_results($query);
 

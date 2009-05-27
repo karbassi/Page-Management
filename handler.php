@@ -1,7 +1,7 @@
 <?php
 session_start();
 // Stop any calls not from the main page.
-if (empty($_POST) && empty($_GET)) {
+if (empty($_REQUEST)) {
    header("Location: ./");
    exit;
 }
@@ -12,37 +12,30 @@ require_once 'lib/pm.php';
 // Create a new PageManagement instance.
 $pm = new PageManagement();
 
-switch ($_GET['func']) {
-   case 'menu':
-      echo $pm->buildMenu();
-      break;
-
-   case 'load':
-      echo json_encode($pm->loadContent($_GET['id']));
-      break;
-}
-
-
-// Make sure you're not trying to create when you want to update.
-if (!empty($_POST['id'])) {
-   $_POST['func'] = 'update';
-}
+// $func = isset($_POST['func']) ? $_POST['func'] : $_GET['func'];
 
 // Handle which function gets called.
-switch ($_POST['func']) {
+switch ($_REQUEST['func']) {
    case 'post':
-      unset($_POST['func']);
-      $id = $pm->postNewContent($_POST);
-
-      if ($id) {
-         $message = "Content create.";
+      // Make sure you're not trying to create when you want to update.
+      if (!empty($_POST['id'])) {
+         $_REQUEST['func'] = 'update';
+         // break;
       } else {
-         $message = "Content NOT created. Try again in a few minutes.";
+         unset($_POST['func']);
+         $id = $pm->postNewContent($_POST);
+
+         if ($id) {
+            $message = "Content create.";
+         } else {
+            $message = "Content NOT created. Try again in a few minutes.";
+         }
+
+         echo json_encode(array("id" => $id, "message" => $message));
+
+         break;
       }
       
-      echo json_encode(array("id" => $id, "message" => $message));
-
-      break;
 
    case 'update':
       unset($_POST['func']);
@@ -56,8 +49,24 @@ switch ($_POST['func']) {
       
       echo json_encode(array("id" => $id, "message" => $message));
       break;
+      
+   case 'delete':
+      unset($_POST['func']);
+      if ($pm->deleteContent((int)$_POST['id'])) {
+         $message = "Content deleted.";
+      } else {
+         $message = "Content NOT deleted. Try again in a few minutes.";
+      }
+   
+      echo json_encode(array("message" => $message));
+      break;
    
    case 'menu':
+      if ($_GET) {
+         echo $pm->buildMenu();
+         break;
+      }
+      
       unset($_POST['func']);
       if ($pm->updateMenu($_POST['data'])) {
          $message = "Menu order updated.";
@@ -86,6 +95,17 @@ switch ($_POST['func']) {
          // Finally, destroy the session.
          session_destroy();
       }
-      // echo json_encode(array("message" => $message));
+      break;
+
+   case 'load':
+      $item = $pm->loadContent($_GET['id']);
+
+      if ($item) {
+         $message = "Content loaded.";
+      } else {
+         $message = "Content NOT loaded. Try again in a few minutes.";
+      }
+      
+      echo json_encode(array('item' => $item, 'message' => $message));
       break;
 }

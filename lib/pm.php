@@ -102,6 +102,64 @@ class PageManagement
 
       return false;
    }
+   
+   public function deleteContent($id)
+   {
+      if (empty($id)) {
+         return;
+      }
+      
+      $this->updateChildren($id);
+      
+      // Delete the item
+      $query = "DELETE FROM `pm`" . 
+               "WHERE `ID` = '" . $id . "'";
+
+      return $this->db->get_row($query);
+
+   }
+
+   private function updateChildren($parent)
+   {
+      if (!isset($parent)) {
+         return;
+      }
+      $query = "SELECT `order`, `parent`".
+               "FROM `pm` " . 
+               "WHERE `ID` = '" . $parent . "' ";
+               
+      $parent_row = $this->db->get_row($query);
+      $parent_order = $parent_row->order;
+      $parent_parent = $parent_row->parent;
+      
+      // var_dump($parent_order);      
+      
+      
+      // Move all children up a level.
+      // Keep the order of $id and assign it to the children being 
+      // moved.
+      $query = "SELECT `ID`, `order`, `parent` ".
+               "FROM `pm` " . 
+               "WHERE `parent` = '" . $parent . "' ".
+               "ORDER BY `order` ASC, `parent` ASC ";
+      var_dump($query);
+      $children = $this->db->get_results($query);
+      
+      if (count($children) > 0) {
+         foreach ($children as $child) {
+            // var_dump($child);
+            $this->updateChildren($child->ID);
+            $query = "UPDATE `pm` ".
+                     "SET `order` = '" . $parent_order . "', `parent` = '" . $parent_parent . "' " .
+                     "WHERE `ID` = '" . $child->ID . "'";
+            var_dump($query);
+            $this->db->query($query);
+            
+            
+            $parent_order++;
+         }
+      }
+   }
 
 
    public function updateMenu($data)

@@ -125,7 +125,25 @@ if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
                
                // Delete Button
                $("#deleteButton").click(function() {
-                  $.addNotification({text: "Delete button is not currently working."});
+                  // $.addNotification({text: "Delete button is not currently working."});
+                  
+                  $.post("handler.php", {
+                        func:    'delete',
+                        id:      $.trim($('#ID').val())
+                     },
+                     function(data){
+                        
+                        console.debug(data);
+                        
+                        // Notify
+                        $.addNotification({text: data.message});
+
+                        // Update Menu
+                        $('#navigation').empty().append("<div></div>");
+                        createMenu();
+                     },
+                     "json"
+                  );
                });
                
                function createMenu(){
@@ -166,15 +184,17 @@ if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
                
                function loadPost(id) {
                   $.getJSON("handler.php",{func: 'load', id: id}, function(data) {
-                     $('#ID').val(data['ID']);
-                     $('#title').val(data['title']);
-                     $('#content').val(data['content']);
-                     $('#type').val(data['type']);
-                     $('#status').val(data['status']);
-                     $('#display').val(data['display']);
+                     $('#ID').val(data['item']['ID']);
+                     $('#title').val(data['item']['title']);
+                     $('#content').val(data['item']['content']);
+                     $('#type').val(data['item']['type']);
+                     $('#status').val(data['item']['status']);
+                     $('#display').val(data['item']['display']);
                      newContent = false;
                      formChanged = false;
                      checkFormStatus();
+                     $.addNotification({text: data['message']});
+                     
                   });
                }
                

@@ -16,7 +16,7 @@
 class PageManagement
 {
    private $db;
-   private $safe = array('title', 'content', 'status', 'type', 'hidden',
+   private $safe = array('title', 'content', 'status', 'type', 'display',
                          'id');
 
    function __construct()
@@ -62,8 +62,6 @@ class PageManagement
       // Run the query and return the auto generated id.
       if ($this->db->query($query)) {
          $id = $this->db->insert_id;
-         // $order = (int)$this->db->get_var("SELECT `order` FROM `pm` WHERE `id` = '" . $id . "'");
-         // return array($id, $order);
          return $id;
       }
 
@@ -126,11 +124,29 @@ class PageManagement
       return true;
    }
 
-    public function buildMenu($value='')
-    {
+   public function buildMenu($value='')
+   {
        return '{"columns":["Page Names"],"items":' . $this->buildListing() . '}';
     }
 
+   public function login($password='')
+   {
+      return sha1(MD5($password) . PASSWORD_SEED) === PROJECT_PASSWORD;
+   }
+   
+   public function loadContent($id='')
+   {
+      if (empty($id)) {
+         return;
+      }
+      
+      $query = "SELECT `ID`, `type`, `content`, `title`, `status`, `display` " . 
+               "FROM `pm` " . 
+               "WHERE `ID` = '" . $id . "'";
+
+      return $this->db->get_row($query);
+   }
+   
 // Private Functions
 
     private function buildListing($parent=0, $level=0) {

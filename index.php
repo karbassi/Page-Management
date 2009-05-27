@@ -1,3 +1,10 @@
+<?php 
+session_start();
+if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
+   header("Location: signin.php");
+}
+
+?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <!-- Because HTML 5 will be the future! -->
 <html lang="en">
@@ -10,71 +17,7 @@
 
       <!-- Let's work from scratch, shall we? -->
       <link href="css/reset.css" rel="stylesheet" type="text/css" media="all">
-      <style type="text/css" media="screen">
-         /*For testing only*/
-/*         div{border: 1px solid #999;}
-         form{border: 1px solid #F00;}*/
-
-
-/*font:italic 18px "Warnock Pro","Goudy Old Style","Palatino","Book Antiqua",Georgia,serif;letter-spacing:1px;word-spacing:2px;line-height:10px;*/
-         /*Production*/
-         html,body{background-color: #F8F6F3;height:100%;font-family:Georgia,times,serif;letter-spacing: 1px;line-height: 1.5em;}
-         .clear{clear: both;}
-         #navigation, #main {float:left;}
-
-
-         /* Form */
-         fieldset{width:600px;}
-         label,input,textarea,select{float:left;clear:left;-moz-box-sizing: border-box;}
-         label{margin-top: 0.5em;}
-         input{width:200px;}
-         select{width:100px;}
-         textarea{width:400px;min-height: 200px;}
-         legend{font:30px "Warnock Pro","Goudy Old Style","Palatino","Book Antiqua",Georgia,serif;letter-spacing:1px;word-spacing:2px;line-height:10px;padding-bottom: 0.5em;}
-         fieldset #formElement {margin-left: 2em;}
-         #deleteButton, #postButton, #updateButton{margin-top: 1em;float:left;clear:none !important;}
-         #postOptions{float:left;margin-left: 1em;}
-         #title{width: 400px;}
-         
-
-
-         .checkbox {float:left;clear:both;margin-top: 0.5em;}
-         .checkbox input{width:10px;float:left;margin-right:0.5em;}
-         .checkbox label{width:10px;clear:none;margin: 0;padding: 0;}
-
-         /* Navigation */
-         #navigation{width:250px;min-width: 250px;max-width:250px;background-color: #342A1C;color: #FFF;}
-         #navigation{min-height:100%;}
-         * html #navigation{height:100%;}
-         #sortHelper { border-left:2px dashed #777; }
-         #navigation>div, #main>div{padding:3em 2em;}
-         .nsw-item-row div { cursor: pointer; }
-         /*#dragHelper { border:2px dashed #777777; }*/
-         
-         
-         
-         
-         
-         
-
-         /* Notification */
-         #notification {
-            cursor: pointer;
-            font-weight: bold;
-            font: 30px Helvetica, sans-serif;
-            line-height: 2em;
-            color: #FFF;
-            background-color: #AEAEAE;
-            position: absolute;
-            z-index: 9999;
-            opacity: 0.80;
-            top: 0;
-            text-align: center;
-         }
-
-
-
-      </style>
+      <link href="css/style.css" rel="stylesheet" type="text/css" media="all">
 
       <!--  jQuery -->
       <script type="text/javascript" src="lib/jquery/jquery.pack.js"></script>
@@ -95,7 +38,7 @@
                var formChanged = false;
                var newContent = true;
 
-               $('#title, #content, #status, #type, #hidden').change(function(){
+               $('#title, #content, #status, #type, #display').change(function(){
                   formChanged = true;
                });
                
@@ -113,13 +56,9 @@
                   }
                   
                   if (newContent){
-                     // $('#post_id, ').val('');
+                     // $('#ID, ').val('');
                      $('#formElement').clearForm();
                   }
-                  
-                  console.debug(formChanged);
-                  console.debug(newContent);
-                  console.debug($('#post_id').val());
                }
                
 
@@ -139,19 +78,19 @@
 
                   $.post("handler.php", {
                         func:    button[0],
-                        id:      $.trim($('#post_id').val()),
+                        id:      $.trim($('#ID').val()),
                         order:   $.trim($('#order').val()),
                         title:   $.trim($('#title').val()),
                         content: $.trim($('#content').val()),
                         status:  $.trim($('#status').val()),
                         type:    $.trim($('#type').val()),
-                        hidden:  $('#hidden').is(':checked'),
+                        display: $.trim($('#display').val())
                      },
                      function(data){
 
                         // Only set value if there ID doesn't exist.
-                        if (!$.trim($('#post_id').val())) {
-                           $('#post_id').val(data.id);
+                        if (!$.trim($('#ID').val())) {
+                           $('#ID').val(data.id);
                         }
 
                         // Change back so that we know the form has been
@@ -171,12 +110,6 @@
                         
                         checkFormStatus();
                         
-                        // // Enable Post Button
-                        // $('#deleteButton').val("Delete").removeAttr("disabled");
-                        // 
-                        // // Change legend
-                        // $('fieldset>legend').text("Post Content Changes");
-
                         // Notify
                         $.addNotification({text: data.message});
                         
@@ -189,11 +122,16 @@
                   );
                });
                
+               // Delete Button
+               $("#deleteButton").click(function() {
+                  $.addNotification({text: "Delete button is not currently working."});
+               });
+               
                function createMenu(){
                   // Navigation
                   $('#navigation>div').NestedSortableWidget({
                      name: "nav",
-                     loadUrl: "handler.php?menu",
+                     loadUrl: "handler.php?func=menu",
                      nestedSortCfg: {
                         accept: 'item',
                         opacity: 0.6,
@@ -217,10 +155,25 @@
                      onLoad: function() {
                         $('.nsw-item > .nsw-item-row > div').each(function(){
                            $(this).click(function(){
-                              console.debug($(this).text());
+                              var id = $(this).parent().parent().attr('id').split('-').pop();
+                              loadPost(id);
                            });
                         });
                      }
+                  });
+               }
+               
+               function loadPost(id) {
+                  $.getJSON("handler.php",{func: 'load', id: id}, function(data) {
+                     $('#ID').val(data['ID']);
+                     $('#title').val(data['title']);
+                     $('#content').val(data['content']);
+                     $('#type').val(data['type']);
+                     $('#status').val(data['status']);
+                     $('#display').val(data['display']);
+                     newContent = false;
+                     formChanged = false;
+                     checkFormStatus();
                   });
                }
                
@@ -243,8 +196,6 @@
                
                createMenu();
                checkFormStatus();
-               
-               
 
             });
          })(jQuery);
@@ -260,33 +211,29 @@
             <fieldset>
                <legend>Post New Content</legend>
                <div id="formElement">
-                  <input type="hidden" name="post_id" value="" id="post_id">
+                  <input type="hidden" name="ID" value="" id="ID">
                   <label for="title">Title</label><input type="text" name="title" value="" id="title" maxlength="100">
                   <label for="content">Content</label><textarea name="content" id="content" rows="8" cols="40"></textarea>
 
                   <div id="postOptions">
                      <label for="status">Status</label>
                      <select name="status" id="status">
-                        <option value="Draft" selected="selected">Draft</option>
-                        <option value="Private">Private</option>
-                        <option value="Public">Public</option>
+                        <option value="draft" selected="selected">Draft</option>
+                        <option value="private">Private</option>
+                        <option value="public">Public</option>
                      </select>
 
                      <label for="type">Type</label>
                      <select name="type" id="type">
-                        <option value="Page" selected="selected">Page</option>
-                        <option value="Blog">Blog</option>
+                        <option value="page" selected="selected">Page</option>
+                        <option value="blog">Blog</option>
                      </select>
                      
                      <label for="display">Display</label>
                      <select name="display" id="display">
-                        <option value="Shown" selected="selected">Shown</option>
-                        <option value="Hidden">Hidden</option>
+                        <option value="shown" selected="selected">Shown</option>
+                        <option value="hidden">Hidden</option>
                      </select>
-
-                     <!-- <div class="checkbox">
-                        <input type="checkbox" name="hidden" value="" id="hidden"><label for="hidden">Hidden</label>
-                     </div> -->
                   </div>
                   <!-- #postOptions -->
 

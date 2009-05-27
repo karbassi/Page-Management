@@ -9,6 +9,6 @@ CREATE TABLE IF NOT EXISTS `pm` (
   `status` enum('draft','private','public') NOT NULL default 'draft',
   `parent` bigint(20) unsigned NOT NULL default '0',
   `order` int(11) NOT NULL default '0',
-  `hidden` tinyint(1) NOT NULL default '0',
+  `display` enum('shown','hidden') NOT NULL default 'shown',
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;

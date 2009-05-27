@@ -1,4 +1,10 @@
 <?php
+session_start();
+// Stop any calls not from the main page.
+if (empty($_POST) && empty($_GET)) {
+   header("Location: ./");
+   exit;
+}
 
 // Load PageManagement Class.
 require_once 'lib/pm.php';
@@ -6,18 +12,15 @@ require_once 'lib/pm.php';
 // Create a new PageManagement instance.
 $pm = new PageManagement();
 
-// Retrieve menu
-if (isset($_GET['menu'])) {
-   echo $pm->buildMenu();
-   exit;
-}
+switch ($_GET['func']) {
+   case 'menu':
+      echo $pm->buildMenu();
+      break;
 
-// Stop any calls not from the main page.
-if (!$_POST || !$_REQUEST) {
-   header("Location: ./");
-   exit;
+   case 'load':
+      echo json_encode($pm->loadContent($_GET['id']));
+      break;
 }
-
 
 
 // Make sure you're not trying to create when you want to update.
@@ -63,11 +66,26 @@ switch ($_POST['func']) {
       }
       
       echo json_encode(array("message" => $message));
-      
-
       break;
+   
+   case 'login':
+      unset($_POST['func']);
+      echo (string)$pm->login($_POST['password']);
+      if ($pm->login($_POST['password'])) {
+         $_SESSION['l_o_g_g_e_d__i_n'] = true;
+      } else {
+         // Unset all of the session variables.
+         $_SESSION = array();
 
-   default:
+         // If it's desired to kill the session, also delete the session cookie.
+         // Note: This will destroy the session, and not just the session data!
+         if (isset($_COOKIE[session_name()])) {
+            setcookie(session_name(), '', time()-42000, '/');
+         }
 
+         // Finally, destroy the session.
+         session_destroy();
+      }
+      // echo json_encode(array("message" => $message));
       break;
 }

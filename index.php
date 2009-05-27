@@ -1,9 +1,8 @@
-<?php 
+<?php
 session_start();
 if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
    header("Location: login.php");
 }
-
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <!-- Because HTML 5 will be the future! -->
@@ -35,7 +34,7 @@ if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
          // Stuff to do as soon as the DOM is ready. Use $() w/o colliding with other libs;
          (function($){
             jQuery(document).ready(function($) {
-               
+
                var formChanged = false;
                var newContent = true;
 
@@ -43,29 +42,17 @@ if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
                   formChanged = true;
                });
                
-               function checkFormStatus() {
-                  if (newContent){
-                     $('#deleteButton').attr("disabled","disabled");
-
-                     // Change legend
-                     $('fieldset>legend').text("Post New Content");
-                  } else {
-                     $('#deleteButton').removeAttr("disabled");
-
-                     // Change legend
-                     $('fieldset>legend').text("Post Content Changes");
+               $('#createButton').click(function() {
+                  if (!newContent){
+                     formChanged = false;
+                     newContent = true;
+                     checkFormStatus();
                   }
-                  
-                  if (newContent){
-                     // $('#ID, ').val('');
-                     $('#formElement').clearForm();
-                  }
-               }
-               
+               });
 
                // Handle submit
                $('#postButton, #updateButton').click(function() {
-                  
+
                   var button = $(this)[0].id.split("Button");
                   // Stop if there hasn't been any changes.
                   if (!formChanged)
@@ -97,58 +84,77 @@ if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
                         // Change back so that we know the form has been
                         // saved and not updated again.
                         formChanged = false;
-                        
+
                         // Not new content anymore.
                         newContent = false;
 
-                        // Re-enable the button and change it to a 
+                        // Re-enable the button and change it to a
                         // updatebutton
                         $('#postButton')
                            .attr("id","updateButton")
                            .attr("name","updateButton")
                            .val("Update")
                            .removeAttr("disabled");
-                        
+
                         checkFormStatus();
-                        
+
                         // Notify
                         $.addNotification({text: data.message});
-                        
+
                         // Update Menu
-                        $('#navigation').empty().append("<div></div>");
+                        $('#pageListing').empty().append("<div></div>");
                         createMenu();
-                        
+
                      },
                      "json"
                   );
                });
-               
+
                // Delete Button
                $("#deleteButton").click(function() {
                   // $.addNotification({text: "Delete button is not currently working."});
-                  
+
                   $.post("handler.php", {
                         func:    'delete',
                         id:      $.trim($('#ID').val())
                      },
                      function(data){
-                        
+
                         console.debug(data);
-                        
+
                         // Notify
                         $.addNotification({text: data.message});
 
                         // Update Menu
-                        $('#navigation').empty().append("<div></div>");
+                        $('#pageListing').empty().append("<div></div>");
                         createMenu();
                      },
                      "json"
                   );
                });
-               
+
+               function checkFormStatus() {
+                  if (newContent){
+                     $('#deleteButton').attr("disabled","disabled");
+
+                     // Change legend
+                     $('fieldset>legend').text("Post New Content");
+                  } else {
+                     $('#deleteButton').removeAttr("disabled");
+
+                     // Change legend
+                     $('fieldset>legend').text("Post Content Changes");
+                  }
+
+                  if (newContent){
+                     // $('#ID, ').val('');
+                     $('#formElement').clearForm();
+                  }
+               }
+
                function createMenu(){
                   // Navigation
-                  $('#navigation>div').NestedSortableWidget({
+                  $('#pageListing>div').NestedSortableWidget({
                      name: "nav",
                      loadUrl: "handler.php?func=menu",
                      nestedSortCfg: {
@@ -181,7 +187,7 @@ if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
                      }
                   });
                }
-               
+
                function loadPost(id) {
                   $.getJSON("handler.php",{func: 'load', id: id}, function(data) {
                      $('#ID').val(data['item']['ID']);
@@ -194,10 +200,10 @@ if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
                      formChanged = false;
                      checkFormStatus();
                      $.addNotification({text: data['message']});
-                     
+
                   });
                }
-               
+
                $.fn.clearForm = function() {
                   // iterate each matching form
                   return this.each(function() {
@@ -214,7 +220,7 @@ if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
                      });
                   });
                };
-               
+
                createMenu();
                checkFormStatus();
 
@@ -224,11 +230,16 @@ if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
    </head>
    <body>
 
-      <div id="navigation"><div></div></div>
+      <div id="navigation">
+         <div class="inner">
+            <div id="createButton">Create New</div>
+            <div id="pageListing"><div></div></div>
+         </div>
+      </div>
       <!-- #navigation -->
 
       <div id="main">
-         <div>
+         <div class="inner">
             <fieldset>
                <legend>Post New Content</legend>
                <div id="formElement">
@@ -249,7 +260,7 @@ if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
                         <option value="page" selected="selected">Page</option>
                         <option value="blog">Blog</option>
                      </select>
-                     
+
                      <label for="display">Display</label>
                      <select name="display" id="display">
                         <option value="shown" selected="selected">Shown</option>
@@ -260,7 +271,7 @@ if (!isset($_SESSION['l_o_g_g_e_d__i_n'])) {
 
                   <input type="button" value="Delete" id="deleteButton" name="deleteButton" disabled="disabled"> <input type="submit" value="Post" id="postButton" name="postButton">
 
-                  <br class="clear">   
+                  <br class="clear">
                </div>
             </fieldset>
          </div>

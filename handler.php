@@ -12,8 +12,6 @@ require_once 'lib/pm.php';
 // Create a new PageManagement instance.
 $pm = new PageManagement();
 
-// $func = isset($_POST['func']) ? $_POST['func'] : $_GET['func'];
-
 // Handle which function gets called.
 switch ($_REQUEST['func']) {
    case 'post':
@@ -35,7 +33,6 @@ switch ($_REQUEST['func']) {
 
          break;
       }
-      
 
    case 'update':
       unset($_POST['func']);
@@ -46,10 +43,10 @@ switch ($_REQUEST['func']) {
       } else {
          $message = "Content NOT updated. Try again in a few minutes.";
       }
-      
+
       echo json_encode(array("id" => $id, "message" => $message));
       break;
-      
+
    case 'delete':
       unset($_POST['func']);
       if ($pm->deleteContent((int)$_POST['id'])) {
@@ -57,26 +54,26 @@ switch ($_REQUEST['func']) {
       } else {
          $message = "Content NOT deleted. Try again in a few minutes.";
       }
-   
+
       echo json_encode(array("message" => $message));
       break;
-   
+
    case 'menu':
       if ($_GET) {
          echo $pm->buildMenu();
          break;
       }
-      
+
       unset($_POST['func']);
       if ($pm->updateMenu($_POST['data'])) {
          $message = "Menu order updated.";
       } else {
          $message = "Menu order NOT updated. Try again in a few minutes.";
       }
-      
+
       echo json_encode(array("message" => $message));
       break;
-   
+
    case 'login':
       unset($_POST['func']);
       echo (string)$pm->login($_POST['password']);
@@ -105,7 +102,7 @@ switch ($_REQUEST['func']) {
       } else {
          $message = "Content NOT loaded. Try again in a few minutes.";
       }
-      
+
       echo json_encode(array('item' => $item, 'message' => $message));
       break;
 }

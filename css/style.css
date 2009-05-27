@@ -1,6 +1,7 @@
 html,body{background-color:#F8F6F3;height:100%;font-family:Georgia,times,serif;letter-spacing:1px;line-height:1.5em;}
 .clear{clear:both;}
 #navigation,#main{float:left;}
+#navigation .inner,#main .inner{padding:3em 2em;}
 
 /* Form */
 fieldset{width:600px;}
@@ -9,7 +10,7 @@ label{margin-top:0.5em;}
 input{width:200px;}
 select{width:100px;}
 textarea{width:400px;min-height:200px;}
-legend{font:30px "Warnock Pro","Goudy Old Style","Palatino","Book Antiqua",Georgia,serif;letter-spacing:1px;word-spacing:2px;line-height:10px;padding-bottom:0.5em;}
+#createButton,legend{font:30px "Warnock Pro","Goudy Old Style","Palatino","Book Antiqua",Georgia,serif;letter-spacing:1px;word-spacing:2px;line-height:10px;padding-bottom:0.5em;}
 fieldset #formElement{margin-left:2em;}
 #deleteButton,#postButton,#updateButton{margin-top:1em;float:left;clear:none !important;}
 #postOptions{float:left;margin-left:1em;}
@@ -19,7 +20,5 @@ fieldset #formElement{margin-left:2em;}
 #navigation{width:250px;min-width:250px;max-width:250px;background-color:#342A1C;color:#FFF;}
 #navigation{min-height:100%;}
 * html #navigation{height:100%;}
-#sortHelper{border-left:2px dashed #777;}
-#navigation>div,#main>div{padding:3em 2em;}
-.nsw-item-row div{cursor:pointer;}
-/*#dragHelper{border:2px dashed #777777;}*/
+#dragHelper, #sortHelper{border:2px dashed #777;color: #FFF;}
+#createButton, .nsw-item-row div{cursor:pointer;}

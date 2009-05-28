@@ -12,4 +12,3 @@ html,body{height:100%;width:100%;}
 label,input,textarea,select{float:left;clear:left;margin-top:0.5em;width:200px;-moz-box-sizing:border-box;}
 label{margin-left: -9999em;line-height: 1px;}
 legend{font:30px "Warnock Pro","Goudy Old Style","Palatino","Book Antiqua",Georgia,serif;letter-spacing:1px;word-spacing:2px;line-height:10px;text-align: center;width:200px;}
-

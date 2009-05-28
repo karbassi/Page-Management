@@ -51,11 +51,13 @@ switch ($_REQUEST['func']) {
       unset($_POST['func']);
       if ($pm->deleteContent((int)$_POST['id'])) {
          $message = "Content deleted.";
+         $pass = true;
       } else {
          $message = "Content NOT deleted. Try again in a few minutes.";
+         $pass = false;
       }
 
-      echo json_encode(array("message" => $message));
+      echo json_encode(array("pass" => $pass, "message" => $message));
       break;
 
    case 'menu':

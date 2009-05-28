@@ -1,16 +1,17 @@
 <?php
 /**
+ * A light-weight page management system.
  *
  * @author Ali Karbassi
- * @version $Id$
- * @copyright Ali Karbassi - May 17, 2009
+ * @version 1.0
+ * @copyright Ali Karbassi - May 27, 2009
  * @package Page Management
  **/
 
 /**
+ * A light-weight page management system.
  *
- *
- * @package default
+ * @package PageManagement
  * @author Ali Karbassi
  */
 class PageManagement
@@ -19,6 +20,11 @@ class PageManagement
    private $safe = array('title', 'content', 'status', 'type', 'display',
                          'id');
 
+   /**
+    * Default constructor
+    *
+    * @author Ali Karbassi
+    */
    function __construct()
    {
       // Include the config file;
@@ -29,7 +35,13 @@ class PageManagement
       $this->db = new ezSQL_mysql(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
    }
 
-
+   /**
+    * Posts new content to the database.
+    *
+    * @param string $data
+    * @return Id/false - Returns the inserted ID or false.
+    * @author Ali Karbassi
+    */
    public function postNewContent($data)
    {
       // Clean the data.
@@ -41,7 +53,8 @@ class PageManagement
       }
 
       // Setting this to an extreme so new content is listed last.
-      $data['order'] = (int)$this->db->get_var("SELECT MAX(`order`) FROM `pm`") + 1;
+      $query = "SELECT MAX(`order`) FROM `pm`";
+      $data['order'] = (int)$this->db->get_var($query) + 1;
 
       // Start the query string parts.
       $query = 'INSERT INTO pm (';
@@ -68,6 +81,13 @@ class PageManagement
       return false;
    }
 
+   /**
+    * Updates content. The ID is passed in via $data.
+    *
+    * @param string $data Content to be updated.
+    * @return Id/false - Returns the inserted ID or false.
+    * @author Ali Karbassi
+    */
    public function updateContent($data)
    {
       // Clean up the data.
@@ -103,64 +123,60 @@ class PageManagement
       return false;
    }
 
+   /**
+    * Deletes a specific item.
+    *
+    * @param string $id Item to be deleted
+    * @return boolean True if item was deleted, else false
+    * @author Ali Karbassi
+    */
    public function deleteContent($id)
    {
       if (empty($id)) {
          return;
       }
 
-      $this->updateChildren($id);
-
-      // Delete the item
-      $query = "DELETE FROM `pm`" .
-               "WHERE `ID` = '" . $id . "'";
-
-      return $this->db->get_row($query);
-
-   }
-
-   private function updateChildren($parent)
-   {
-      if (!isset($parent)) {
-         return;
-      }
       $query = "SELECT `ID`, `order`, `parent`".
                "FROM `pm` " .
-               "WHERE `ID` = '" . $parent . "' ";
+               "WHERE `ID` = '" . $id . "' ";
 
-      $parent_row = $this->db->get_row($query);
-      $parent_order = $parent_row->order;
-      $parent_parent = $parent_row->parent;
-
-echo "Parent row-> ID:", $parent_row->ID, " O:", $parent_row->order, " P:", $parent_row->parent, "\n";
+      $parent = $this->db->get_row($query);
 
       // Move all children up a level.
       // Keep the order of $id and assign it to the children being
       // moved.
       $query = "SELECT `ID`, `order`, `parent` ".
                "FROM `pm` " .
-               "WHERE `parent` = '" . $parent . "' ".
+               "WHERE `parent` = '" . $id . "' ".
                "ORDER BY `order` ASC, `parent` ASC ";
-      var_dump($query);
+
       $children = $this->db->get_results($query);
 
       if (count($children) > 0) {
          foreach ($children as $child) {
-            // var_dump($child);
-            echo "Child -> ID:", $child->ID, " O:", $child->order, " P:", $child->parent, "\n";
-            $this->updateChildren($child->ID);
             $query = "UPDATE `pm` ".
-                     "SET `order` = '" . $parent_order . "', `parent` = '" . $parent_parent . "' " .
+                     "SET `order` = '" . $parent->order . "', ".
+                     " `parent` = '" . $parent->parent . "' " .
                      "WHERE `ID` = '" . $child->ID . "'";
-            var_dump($query);
             $this->db->query($query);
-
-            $parent_order++;
+            $parent->order++;
          }
       }
+
+      // Delete the item
+      $query = "DELETE FROM `pm`" .
+               "WHERE `ID` = '" . $id . "'";
+
+      return $this->db->query($query);
    }
 
-
+   /**
+    * Updates the menu structure to the database.
+    *
+    * @param string $data Menu structure
+    * @return void
+    * @author Ali Karbassi
+    */
    public function updateMenu($data)
    {
       $data = $this->menuUnserialize($data);
@@ -181,30 +197,51 @@ echo "Parent row-> ID:", $parent_row->ID, " O:", $parent_row->order, " P:", $par
       return true;
    }
 
-   public function buildMenu($value='')
+   /**
+    * Builds the menu structure to be passed to jQuery.
+    *
+    * @return string String containing the json structure to be returned.
+    * @author Ali Karbassi
+    */
+   public function buildMenu()
    {
       $items = $this->buildListing();
-      // var_dump($items);
-      // Empty list
+
+      // Catching empty list
       if ($items == ']') {
          $items = "[]";
       }
-      
+
       return '{"columns":["Page Names"],"items":' . $items . '}';
    }
 
+   /**
+    * Checks the login against the simple password.
+    *
+    * @param string $password Password being checked.
+    * @return boolean True if password matches, else false.
+    * @author Ali Karbassi
+    */
    public function login($password='')
    {
       return sha1(MD5($password) . PASSWORD_SEED) === PROJECT_PASSWORD;
    }
 
+   /**
+    * Loads a specific item by id.
+    *
+    * @param string $id Item id to be loaded.
+    * @return hash The hash element containing the item loaded.
+    * @author Ali Karbassi
+    */
    public function loadContent($id='')
    {
       if (empty($id)) {
          return;
       }
 
-      $query = "SELECT `ID`, `type`, `content`, `title`, `status`, `display` " .
+      $query = "SELECT `ID`, `type`, `content`, `title`, `status`, " .
+               "`display` " .
                "FROM `pm` " .
                "WHERE `ID` = '" . $id . "'";
 
@@ -213,7 +250,14 @@ echo "Parent row-> ID:", $parent_row->ID, " O:", $parent_row->order, " P:", $par
 
 // Private Functions
 
-    private function buildListing($parent=0, $level=0) {
+   /**
+    * Recursive function to build the menu.
+    *
+    * @param string $parent Parent ID used to find children.
+    * @return string String to be parsed as json object
+    * @author Ali Karbassi
+    */
+   private function buildListing($parent=0) {
       $query = "SELECT `ID`, `parent`, `title` " .
                "FROM `pm` " .
                "WHERE parent = '" . $parent . "' " .
@@ -223,10 +267,9 @@ echo "Parent row-> ID:", $parent_row->ID, " O:", $parent_row->order, " P:", $par
 
       $str = '[';
       if (count($rows) > 0) {
-         $level++;
          foreach ($rows as $row) {
             $str .= '{"id":' . $row->ID . ', "info":["' . $row->title . '"]';
-            $ret = $this->buildListing($row->ID, $level);
+            $ret = $this->buildListing($row->ID);
             if (strlen($ret) > 2) {
                $str .= ', "children": ' . $ret;
             }
@@ -236,6 +279,14 @@ echo "Parent row-> ID:", $parent_row->ID, " O:", $parent_row->order, " P:", $par
       return substr($str, 0, -1) . ']';
    }
 
+   /**
+    * Update the menu order, recursively.
+    *
+    * @param string $data Data to be updated
+    * @param string $parent The parent ID.
+    * @return array Menu structure in array form.
+    * @author Ali Karbassi
+    */
    private function menuOrder($data, $parent = 0)
    {
       $query = array();
@@ -254,6 +305,13 @@ echo "Parent row-> ID:", $parent_row->ID, " O:", $parent_row->order, " P:", $par
       return $query;
    }
 
+   /**
+    * Converts json serialized string into PHP array.
+    *
+    * @param string $data json serialized string
+    * @return array PHP array formed
+    * @author Ali Karbassi
+    */
    private function menuUnserialize($data)
    {
       $fields = explode("&", $_POST['data']);
@@ -272,6 +330,14 @@ echo "Parent row-> ID:", $parent_row->ID, " O:", $parent_row->order, " P:", $par
       return $nav;
    }
 
+   /**
+    * Removes any data passed that is not used. It uses the private safe list.
+    * The function also escapes the data being passed in.
+    *
+    * @param string $data Data to be cleaned
+    * @return string Cleaned data.
+    * @author Ali Karbassi
+    */
    private function clean($data)
    {
       // Remove any data not in the safe list.
@@ -280,7 +346,6 @@ echo "Parent row-> ID:", $parent_row->ID, " O:", $parent_row->order, " P:", $par
       }
 
       foreach ($data as $key => $value) {
-
          // Escape all variables to be safe.
          $data[$key] = $this->db->escape($value);
 
@@ -293,7 +358,6 @@ echo "Parent row-> ID:", $parent_row->ID, " O:", $parent_row->order, " P:", $par
          if ($tmp === 'TRUE') {
             $data[$key] = TRUE;
          }
-
       }
       return $data;
    }

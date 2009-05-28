@@ -24,44 +24,7 @@ if (isset($_SESSION['l_o_g_g_e_d__i_n'])) {
       <!--  jQuery -->
       <script type="text/javascript" src="lib/jquery/jquery.pack.js"></script>
       <script type="text/javascript" src="lib/jquery/jquery.notification.js"></script>
-
-      <script type="text/javascript">
-         // Stuff to do as soon as the DOM is ready. Use $() w/o colliding with other libs;
-         (function($){
-            jQuery(document).ready(function($) {
-
-               // Handle submit
-               $('#go').click(function() {
-
-                  // Disable button to stop multiple submits simultaneously.
-                  $('#go').val("Checking...").attr("disabled","disabled");
-
-                  $.post("handler.php", {
-                        func:       'login',
-                        password:   $('#password').val()
-                     },
-                     function(data){
-                        if (data){
-                           window.location.reload();
-                        } else {
-                           $.addNotification({text: "Wrong password, try again."});
-                           $('#password').val('');
-                        }
-
-
-
-                        // Re-enable the button and change it to a
-                        // updatebutton
-                        $('#go')
-                           .val("Let me in...")
-                           .removeAttr("disabled");
-                     }
-                  );
-               });
-
-            });
-         })(jQuery);
-      </script>
+      <script type="text/javascript" src="lib/jquery/login.js"></script>
    </head>
    <body>
       <div id="outer">

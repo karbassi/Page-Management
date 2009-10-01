@@ -25,6 +25,7 @@ if (isset($_SESSION['l_o_g_g_e_d__i_n'])) {
       <script type="text/javascript" src="lib/jquery/jquery.pack.js"></script>
       <script type="text/javascript" src="lib/jquery/jquery.notification.js"></script>
       <script type="text/javascript" src="lib/jquery/login.js"></script>
+      <script type="text/javascript" src="lib/jquery/analytics.js"></script>
    </head>
    <body>
       <div id="outer">
